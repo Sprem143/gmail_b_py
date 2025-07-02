@@ -10,7 +10,8 @@ import os
 
 # === MongoDB Setup ===
 # client = AsyncIOMotorClient('mongodb://127.0.0.1:27017/gmail')
-client = AsyncIOMotorClient('mongodb+srv://gstar:Gstar1456@gstar.pjdqitc.mongodb.net/?retryWrites=true&w=majority&appName=Gstar')
+mongo_uri = os.environ('MONGO_URI')
+client = AsyncIOMotorClient(mongo_uri)
 db = client["test"]
 sender_collection = db["senders"]
 
