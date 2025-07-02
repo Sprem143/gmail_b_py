@@ -7,10 +7,12 @@ import smtplib
 from email.mime.text import MIMEText
 import asyncio
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # === MongoDB Setup ===
 # client = AsyncIOMotorClient('mongodb://127.0.0.1:27017/gmail')
-mongo_uri = os.environ('MONGO_URI')
+mongo_uri = os.environ.get('MONGO_URI')
 client = AsyncIOMotorClient(mongo_uri)
 db = client["test"]
 sender_collection = db["senders"]
