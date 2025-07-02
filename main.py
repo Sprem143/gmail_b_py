@@ -13,9 +13,12 @@ load_dotenv()
 # === MongoDB Setup ===
 # client = AsyncIOMotorClient('mongodb://127.0.0.1:27017/gmail')
 mongo_uri = os.environ.get('MONGO_URI')
+if not mongo_uri:
+    raise RuntimeError("MONGO_URI not found in .env file")
 client = AsyncIOMotorClient(mongo_uri)
 db = client["test"]
 sender_collection = db["senders"]
+
 
 # === FastAPI App with CORS ===
 app = FastAPI(title="Email Sender API")
@@ -47,7 +50,6 @@ def create_transporter(email, app_password):
 @app.post("/sendemails")
 async def send_emails(data: EmailRequest):
     sender_doc = await sender_collection.find_one({"email": data.senderEmail})
-    print(sender_doc)
     if not sender_doc:
         raise HTTPException(status_code=404, detail="Sender not found")
 
