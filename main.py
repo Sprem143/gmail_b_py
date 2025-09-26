@@ -37,7 +37,8 @@ class Sender(BaseModel):
     appPassword: str
 
 class EmailRequest(BaseModel):
-    senderEmail: EmailStr
+    email:str
+    appPassword:str
     subject: str
     newmessage: str
     receivers: List[EmailStr]
@@ -46,15 +47,17 @@ class EmailRequest(BaseModel):
 def create_transporter(email, app_password):
     return smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10), email, app_password
 
-# === Routes ===
-@app.post("/sendemails")
-async def send_emails(data: EmailRequest):
-    sender_doc = await sender_collection.find_one({"email": data.senderEmail})
-    if not sender_doc:
-        raise HTTPException(status_code=404, detail="Sender not found")
 
-    transporter, user, password = create_transporter(sender_doc["email"], sender_doc["appPassword"])
+@app.post("/sendemails")
+async def send_emails(data:EmailRequest):
+    user = data.email
+    user = data.email
+    password = data.appPassword
+
+    # Create SMTP transporter
     try:
+        transporter = smtplib.SMTP("smtp.gmail.com", 587)
+        transporter.starttls()
         transporter.login(user, password)
     except smtplib.SMTPAuthenticationError:
         raise HTTPException(status_code=401, detail="Invalid sender credentials")
@@ -75,12 +78,7 @@ async def send_emails(data: EmailRequest):
             print(f"Failed to send to {to}: {e}")
             failed += 1
 
-        await asyncio.sleep(5)  # 5 seconds delay like nodemailer example
+        await asyncio.sleep(1)  # delay between sends
 
     transporter.quit()
-    print('response from python')
-    print(sent)
     return {"sent": sent, "failed": failed}
-
-# === Route to Add Sender (for testing/demo) ===
-
